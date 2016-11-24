@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fnord-predict.iml" filepath="$PROJECT_DIR$/.idea/modules/fnord-predict.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fnord-predict_main.iml" filepath="$PROJECT_DIR$/.idea/modules/fnord-predict_main.iml" group="fnord-predict" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fnord-predict_test.iml" filepath="$PROJECT_DIR$/.idea/modules/fnord-predict_test.iml" group="fnord-predict" />
+    </modules>
+  </component>
+</project>

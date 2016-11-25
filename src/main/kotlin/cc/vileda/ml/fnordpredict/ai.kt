@@ -29,7 +29,6 @@ val data: List<StatusDateData> by lazy {
     lines.map {
         val split = it.split(";")
         StatusDateData(
-                1,
                 split[1].toDouble(),
                 split[2].toDouble(),
                 split[3].toDouble(),
@@ -43,39 +42,28 @@ val data: List<StatusDateData> by lazy {
 
 fun normalizeTweets(): List<StatusDateData> {
     return dateTweets
-            .map { if (it.contains("open")) StatusTweet(1, it) else StatusTweet(0, it) }
-            .filter { it.open == 1 }
-            .map { StatusTweet(it.open, it.text.replace(Regex("(?i)#fnordeingang is now open! "), "")) }
-            .map { StatusTweet(it.open, it.text.replace(Regex("(?i) #manuallyTriggered"), "")) }
-            .map { StatusTweet(it.open, it.text.replace(Regex("(?i)is now open! "), "")) }
-            .map { StatusDate(it.open, parseDateTime(it.text)) }
-            .map(::makeStatusDateData)
+            .filter { it.contains("open") }
+            .map { it.replace(Regex("(?i)#fnordeingang is now open! "), "") }
+            .map { it.replace(Regex("(?i) #manuallyTriggered"), "") }
+            .map { it.replace(Regex("(?i)is now open! "), "") }
+            .map(::parseDateTime)
+            .map(::statusDateDataFromDateTime)
 }
 
 fun classify(unknown: LocalDateTime, trainedData: List<StatusDateData>, neighbours: Int = 5): List<ClassifyResultWithDistance> {
-    val statusDateDataFromDateTime = statusDateDataFromDateTime(unknown, 0)
+    val statusDateDataFromDateTime = statusDateDataFromDateTime(unknown)
     return trainedData
             .map {
                 ClassifyResultWithDistance(
-                        it.open,
                         unknown,
-                        //it.data,
-                        //it.date,
-                        //statusDateDataFromDateTime.data,
                         MathArrays.distance(it.data, statusDateDataFromDateTime.data))
             }
             .sortedBy { it.distance }
             .take(neighbours)
 }
 
-private fun makeStatusDateData(it: StatusDate): StatusDateData {
-    val date = it.date
-    return statusDateDataFromDateTime(date, it.open)
-}
-
-private fun statusDateDataFromDateTime(date: LocalDateTime, open: Int): StatusDateData {
+private fun statusDateDataFromDateTime(date: LocalDateTime): StatusDateData {
     return StatusDateData(
-            open,
             date.month.value.toDouble(),
             date.dayOfWeek.value.toDouble(),
             date.hour.toDouble(),
@@ -113,18 +101,11 @@ private fun parseDateTime(dateTime: String): LocalDateTime {
 }
 
 class ClassifyResultWithDistance(
-        val open: Int,
         val input: LocalDateTime,
-        // val dataInput: DoubleArray,
-        // val date: LocalDateTime,
-        // val data: DoubleArray,
         val distance: Double
 ) : Serializable
 
-private data class StatusTweet(val open: Int, val text: String)
-private data class StatusDate(val open: Int, val date: LocalDateTime)
 class StatusDateData(
-        val open: Int,
         month: Double,
         day: Double,
         hour: Double,
@@ -132,9 +113,6 @@ class StatusDateData(
         isWeekday: Double,
         isVacationDay: Double,
         val date: LocalDateTime
-) {
-    val data = arrayOf(month, day, hour, minute, isWeekday, isVacationDay)
-            .toDoubleArray()
-}
+) { val data = arrayOf(month, day, hour, minute, isWeekday, isVacationDay).toDoubleArray() }
 
 

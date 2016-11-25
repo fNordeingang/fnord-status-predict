@@ -26,7 +26,7 @@ fun main(args: Array<String>) {
                         .map { classify(it, trainingData) }
                         .collect(Collectors.toList())
                         .flatMap { it as List<ClassifyResultWithDistance> }
-                        .filter { it.open == 1 && it.distance == 0.0 }
+                        .filter { it.distance == 0.0 }
                         .take(20)
                         .map { it.input.atZone(ZoneOffset.UTC)?.withZoneSameInstant(ZoneId.systemDefault())?.toEpochSecond()!!.toDouble() }
                         .toDoubleArray()
@@ -35,45 +35,56 @@ fun main(args: Array<String>) {
                 LocalDateTime.ofEpochSecond(averageDate.toLong(), 0, ZoneOffset.UTC)
             }
 
-    val validationDay =
-            predictions
-                    .filter {
-                        val p = it
-                        validationData.filter {
-                            p.year == it.year
-                                    && p.monthValue == it.monthValue
-                                    && p.dayOfMonth == it.dayOfMonth
-                        }.isNotEmpty()
-                    }
+    println("obey! fnordeingang opens at ${fnordOpensInHoursFromNow(data)}!")
 
-    val validationHour =
-            predictions
-                    .filter {
-                        val p = it
-                        validationData.filter {
-                            p.year == it.year
-                                    && p.monthValue == it.monthValue
-                                    && p.dayOfMonth == it.dayOfMonth
-                                    && p.hour == it.hour
-                        }.isNotEmpty()
-                    }
+    fun validate(filterFunc: (LocalDateTime) -> (LocalDateTime) -> Boolean): List<LocalDateTime> {
+        return predictions
+                .filter {
+                    val p = it
+                    validationData.filter(filterFunc(p)).isNotEmpty()
+                }
+    }
 
-    val validationHourLoosey =
-            predictions
-                    .filter {
-                        val p = it
-                        validationData.filter {
-                            p.year == it.year
-                                    && p.monthValue == it.monthValue
-                                    && p.dayOfMonth == it.dayOfMonth
-                                    && Math.abs(p.toEpochSecond(ZoneOffset.UTC) - it.toEpochSecond(ZoneOffset.UTC)) <= 60*90
-                        }.isNotEmpty()
-                    }
+    fun dayFilter(p: LocalDateTime, it: LocalDateTime): Boolean {
+        return p.year == it.year && p.monthValue == it.monthValue && p.dayOfMonth == it.dayOfMonth
+    }
+
+    fun hourFilter(p: LocalDateTime, it: LocalDateTime): Boolean {
+        return dayFilter(p, it) && p.hour == it.hour
+    }
+
+    fun hourFilterLoosey(p: LocalDateTime, it: LocalDateTime, range: Int): Boolean {
+        return dayFilter(p, it) && diffDateAbs(it, p) <= range
+    }
+
+    val validationDay = validate {
+        p -> { dayFilter(p, it) }
+    }
+
+    val validationHour = validate {
+        p -> { hourFilter(p, it)  }
+    }
+
+    val validationHourLoosey = validate {
+        p -> { hourFilterLoosey(p, it, 60*90) }
+    }
+
+    val validationHourLoosey2 = validate {
+        p -> { hourFilterLoosey(p, it, 60*120) }
+    }
+
+    val validationHourLoosey3 = validate {
+        p -> { hourFilterLoosey(p, it, 60*180) }
+    }
 
     println("Trainingdata length: ${trainingData.size}")
     println("Validationdata length: ${validationData.size}")
     println("predictions length: ${predictions.size}")
     println("% predictions match day: ${validationDay.size.toDouble() / predictions.size.toDouble()}")
     println("% predictions match hour: ${validationHour.size.toDouble() / predictions.size.toDouble()}")
-    println("% predictions match hour (+-1.5h): ${validationHourLoosey.size.toDouble() / predictions.size.toDouble()}")
+    println("% predictions match hour (±1.5h): ${validationHourLoosey.size.toDouble() / predictions.size.toDouble()}")
+    println("% predictions match hour (±2h): ${validationHourLoosey2.size.toDouble() / predictions.size.toDouble()}")
+    println("% predictions match hour (±3h): ${validationHourLoosey3.size.toDouble() / predictions.size.toDouble()}")
 }
+
+private fun diffDateAbs(it: LocalDateTime, p: LocalDateTime) = Math.abs(p.toEpochSecond(ZoneOffset.UTC) - it.toEpochSecond(ZoneOffset.UTC))

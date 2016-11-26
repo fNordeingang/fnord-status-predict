@@ -1,6 +1,8 @@
 package cc.vileda.ml.fnordpredict
 
 val dateTweets = listOf(
+        "#fnordeingang is now open! 2016-11-23T13:08:01.607Z",
+        "#fnordeingang is now open! 2016-11-22T16:29:01.871Z",
         "#fnordeingang is now open! 2016-11-21T14:35:01.627Z",
         "#fnordeingang has closed, see you soon! 2016-11-21T03:50:59.004Z",
         "#fnordeingang is now open! 2016-11-20T15:27:01.533Z",

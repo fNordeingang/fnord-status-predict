@@ -80,11 +80,11 @@ fun main(args: Array<String>) {
     println("Trainingdata length: ${trainingData.size}")
     println("Validationdata length: ${validationData.size}")
     println("predictions length: ${predictions.size}")
-    println("% predictions match day: ${validationDay.size.toDouble() / predictions.size.toDouble()}")
-    println("% predictions match hour: ${validationHour.size.toDouble() / predictions.size.toDouble()}")
-    println("% predictions match hour (±1.5h): ${validationHourLoosey.size.toDouble() / predictions.size.toDouble()}")
-    println("% predictions match hour (±2h): ${validationHourLoosey2.size.toDouble() / predictions.size.toDouble()}")
-    println("% predictions match hour (±3h): ${validationHourLoosey3.size.toDouble() / predictions.size.toDouble()}")
+    println("% predictions match day: ${validationDay.size.toDouble() / predictions.size.toDouble() * 100}")
+    println("% predictions match hour: ${validationHour.size.toDouble() / predictions.size.toDouble() * 100}")
+    println("% predictions match hour (±1.5h): ${validationHourLoosey.size.toDouble() / predictions.size.toDouble() * 100}")
+    println("% predictions match hour (±2h): ${validationHourLoosey2.size.toDouble() / predictions.size.toDouble() * 100}")
+    println("% predictions match hour (±3h): ${validationHourLoosey3.size.toDouble() / predictions.size.toDouble() * 100}")
 }
 
 private fun diffDateAbs(it: LocalDateTime, p: LocalDateTime) = Math.abs(p.toEpochSecond(ZoneOffset.UTC) - it.toEpochSecond(ZoneOffset.UTC))

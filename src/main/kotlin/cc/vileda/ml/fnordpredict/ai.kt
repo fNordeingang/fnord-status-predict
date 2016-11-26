@@ -50,7 +50,7 @@ fun normalizeTweets(): List<StatusDateData> {
             .map(::statusDateDataFromDateTime)
 }
 
-fun classify(unknown: LocalDateTime, trainedData: List<StatusDateData>, neighbours: Int = 5): List<ClassifyResultWithDistance> {
+fun classify(unknown: LocalDateTime, trainedData: List<StatusDateData>, neighbours: Int = 2): List<ClassifyResultWithDistance> {
     val statusDateDataFromDateTime = statusDateDataFromDateTime(unknown)
     return trainedData
             .map {
